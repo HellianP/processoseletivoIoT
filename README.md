@@ -1,76 +1,73 @@
-## Relatório do Candidato
+# Relatório do Candidato
 
-### Identificação do Candidato
+## Identificação do Candidato
 
-- **Nome completo:Hellian Sampaio Silva Peixinho **
-- **GitHub:https://github.com/HellianP**
-
----
-
-## Visão Geral da Solução
-
-O projeto consiste em um contador de produção não intrusivo utilizando um ESP32 simulado no Wokwi. O sistema monitora a passagem de peças por meio de um sensor LDR, contabilizando cada objeto detectado, identificando situações de micro-parada na linha de produção e permitindo o reset dos contadores através de um botão físico.
-
-A interação do usuário ocorre pela alteração da luminosidade incidente no sensor LDR e também pelo acionamento do botão de reset, enquanto as informações de status e alarmes são disponibilizadas pelo monitor serial.
+- **Nome completo:** Hellian Sampaio Silva Peixinho
+- **GitHub:** https://github.com/HellianP
 
 ---
 
-## Arquitetura do Sistema Embarcado
+# Visão Geral da Solução
 
-O firmware foi desenvolvido em MicroPython utilizando um laço principal (while True) responsável por executar continuamente as leituras do sensor e do botão.
+O projeto consiste em um contador de produção não intrusivo utilizando um ESP32 simulado no Wokwi. O sistema monitora a passagem de peças por meio de um sensor LDR, contabilizando automaticamente cada objeto detectado, identificando situações de micro-parada na linha de produção e permitindo o reset manual dos contadores por meio de um botão.
 
-A lógica implementada é baseada em estados:
-
-Inicialização do sistema com configuração do sensor LDR e botão.
-Monitoramento contínuo da leitura analógica do LDR.
-Detecção da entrada de uma peça quando o valor do sensor ultrapassa o limiar de entrada.
-Contagem da peça quando a luminosidade retorna ao estado normal.
-Monitoramento do tempo de permanência da peça para identificação de micro-paradas.
-Tratamento do botão utilizando debounce para reinicialização dos contadores.
-
-A lógica foi implementada utilizando uma máquina de estados simples e priorizando legibilidade, assim como baixo acoplamento e facilidade de manutenção.
+A interação do usuário ocorre pela alteração da luminosidade incidente no sensor LDR e pelo acionamento do botão de reset. As informações de funcionamento, contagem e alertas são exibidas através do monitor serial (UART).
 
 ---
 
-## Componentes Utilizados na Simulação
+# Arquitetura do Sistema Embarcado
 
-Componentes utilizados:
+O firmware foi desenvolvido em MicroPython utilizando um laço principal (`while True`), responsável pela leitura contínua do sensor LDR e do botão de reset.
 
-ESP32 DevKit C V4: Microcontrolador central responsável pelo processamento lógico do firmware.
+A lógica do sistema é composta pelas seguintes etapas:
 
-Sensor Fotoresistor (LDR) conectado ao ADC (GPIO 34): Responsável pela detecção da passagem das peças através da variação analógica de luminosidade.
+- Inicialização do sistema e configuração dos periféricos.
+- Leitura contínua do sensor LDR.
+- Detecção da entrada de uma peça quando o valor do sensor ultrapassa o limiar de entrada.
+- Contagem da peça quando a luminosidade retorna ao estado normal.
+- Monitoramento do tempo de bloqueio do sensor para identificação de micro-paradas.
+- Leitura do botão com tratamento de debounce para reinicialização dos contadores.
 
-Botão (Push Button) conectado ao GPIO 4: Utilizado para a reinicialização manual dos contadores do turno.
+A solução foi implementada utilizando estados simples, priorizando organização, legibilidade e facilidade de manutenção.
 
-Monitor Serial (UART): Interface de comunicação utilizada para exibir mensagens de inicialização, contagem de peças, alertas de micro-parada e confirmação de reset.
 ---
 
-## Decisões Técnicas Relevantes
+# Componentes Utilizados na Simulação
+
+- **ESP32 DevKit C V4:** microcontrolador responsável pela execução do firmware.
+- **Sensor Fotoresistor (LDR):** conectado ao ADC (GPIO 34), utilizado para detectar a passagem das peças através da variação da luminosidade.
+- **Botão (Push Button):** conectado ao GPIO 4, utilizado para realizar o reset manual do turno.
+- **Monitor Serial (UART):** utilizado para exibir mensagens de inicialização, contagem de peças, alertas de micro-parada e confirmação do reset.
+
+---
+
+# Decisões Técnicas Relevantes
 
 Durante o desenvolvimento foram adotadas as seguintes decisões:
 
-Separação das variáveis de controle em estados simples (peca_passando, micro_parada e contador).
-Utilização de limiares de entrada e saída diferentes para evitar múltiplas contagens durante pequenas oscilações do sensor.
-Utilização de time.ticks_ms() para medição de tempo sem bloqueios longos na execução do firmware.
-Implementação de debounce para o botão de reset utilizando comparação de tempo, evitando múltiplos acionamentos durante um único pressionamento.
-Mensagens seriais implementada conforme especificado no enunciado para garantir compatibilidade com os testes automatizados do Wokwi CI.
+- Utilização de variáveis de estado (`peca_passando`, `micro_parada` e `contador`) para simplificar a lógica do sistema.
+- Definição de limiares distintos de entrada e saída do sensor, reduzindo múltiplas contagens causadas por oscilações na leitura.
+- Utilização de `time.ticks_ms()` para controle de tempo e detecção de micro-paradas sem bloqueios prolongados.
+- Implementação de debounce por software para o botão de reset, evitando múltiplos acionamentos durante um único pressionamento.
+- Implementação das mensagens seriais exatamente conforme especificado no enunciado, garantindo compatibilidade com os testes automatizados do Wokwi CI.
 
 ---
 
-## Resultados Obtidos
+# Resultados Obtidos
 
-O sistema desenvolvido atende aos requisitos propostos:
+O sistema desenvolvido atende aos requisitos propostos no desafio:
 
-Inicialização correta do firmware.
-Contagem de peças através da leitura do sensor LDR.
-Detecção de micro-paradas após permanência prolongada da peça sobre o sensor.
-Reset correto dos contadores por meio do botão físico.
-Compatibilidade com os cenários de validação automatizados do Wokwi CI.
+- Inicialização correta do firmware.
+- Contagem automática de peças utilizando o sensor LDR.
+- Detecção de micro-paradas após permanência prolongada da peça sobre o sensor.
+- Reset correto dos contadores por meio do botão físico.
+- Comunicação serial conforme especificado.
+- Compatibilidade com os cenários de validação automatizados do Wokwi CI.
+
 ---
 
-## Comentários Adicionais (Opcional)
+# Comentários Adicionais
 
-Durante o desenvolvimento foi necessário ajustar os limiares de leitura do sensor LDR de acordo com os valores fornecidos pelo simulador do Wokwi, bem como revisar o tratamento de debounce do botão para garantir apenas um reset por acionamento.
+Durante o desenvolvimento foi necessário ajustar os limiares de leitura do sensor LDR para os valores retornados pelo simulador Wokwi e implementar um tratamento adequado de debounce no botão de reset para evitar múltiplos acionamentos.
 
-A principal aprendizagem obtida foi a importância da implementação de máquinas de estado simples e do uso de lógica não bloqueante em sistemas embarcados, especialmente quando integrados a testes automatizados.
----
+O projeto permitiu reforçar conceitos importantes de sistemas embarcados, como leitura de sensores analógicos, utilização de máquinas de estado simples, programação não bloqueante e integração com pipelines de testes automatizados utilizando GitHub Actions e Wokwi CI.
