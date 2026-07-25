@@ -35,6 +35,8 @@ while True:
             print("Turno resetado com sucesso. Contadores zerados.")
             ultimo_tempo_botao = agora
 
+    ultimo_estado_botao = estado_botao
+
     
 
     # Peça entrou
