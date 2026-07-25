@@ -17,27 +17,30 @@ micro_parada = False
 
 botao = Pin(4, Pin.IN, Pin.PULL_UP)
 
-ultimo_estado_botao = 1
-ultimo_tempo_botao = 0
+ultimo_estado_botao = botao.value()
+tempo_pressionado = None
 
 while True:
     valor = ldr.read()
-
     estado_botao = botao.value()
     agora = time.ticks_ms()
 
+    # Botão pressionado
     if ultimo_estado_botao == 1 and estado_botao == 0:
-        if time.ticks_diff(agora, ultimo_tempo_botao) > 50:
-            contador = 0
-            peca_passando = False
-            micro_parada = False
-            tempo_inicio = 0
-            print("Turno resetado com sucesso. Contadores zerados.")
-            ultimo_tempo_botao = agora
+        tempo_pressionado = agora
+
+    # Botão solto
+    elif ultimo_estado_botao == 0 and estado_botao == 1:
+        if tempo_pressionado is not None:
+            if time.ticks_diff(agora, tempo_pressionado) >= 50:
+                contador = 0
+                peca_passando = False
+                micro_parada = False
+                tempo_inicio = 0
+                print("Turno resetado com sucesso. Contadores zerados.")
+            tempo_pressionado = None
 
     ultimo_estado_botao = estado_botao
-
-    
 
     # Peça entrou
     if not peca_passando and valor >= LIMIAR_ENTRADA:
